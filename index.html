@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S&Design</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="brand-row">
+        <a class="brand" href="#" aria-label="StudyClyb home">
+          <span>S&</span><span>Design</span>
+        </a>
+        <span class="divider" aria-hidden="true"></span>
+        <span class="program">Engineering and Design</span>
+      </div>
+
+      <nav class="nav-links" aria-label="Lesson types">
+        <a href="#">Work</a>
+        <a href="#">About me</a>
+        <a href="#">Contact</a>
+        <a href="#">CV</a>
+      </nav>
+
+      <div class="utility-row">
+        <button class="menu-btn" type="button">
+          <span>Menu</span>
+          <span class="menu-mark" aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-grid">
+      <section class="lesson-area" aria-label="Lessons overview">
+        <div class="lesson-top">
+          <div class="headline-block">
+            <h1>Hi, I'm Ziyue Su</h1>
+            <!-- <span class="headline-count">Maybe A Designer?</span> -->
+          </div>
+
+          <div class="tag-row tag-row-new">
+            <p class="micro-heading">New <span>One</span></p>
+            <div id="new-tags" class="token-wrap" aria-label="New lesson tags"></div>
+          </div>
+
+          <div class="tag-row tag-row-done">
+            <p class="micro-heading">Already <span>Done</span></p>
+            <div id="done-tags" class="token-wrap subdued" aria-label="Already done tags"></div>
+          </div>
+        </div>
+
+        <section id="course-grid" class="course-grid" aria-label="Featured lessons"></section>
+
+      </section>
+
+      <aside class="profile-panel" aria-label="Profile">
+        <div class="profile-header">
+          <p>My <span>Profile</span></p>
+          <button class="dots" type="button" aria-label="Profile options"></button>
+        </div>
+
+        <div class="avatar" role="img" aria-label="Profile avatar"></div>
+
+        <div class="level-ring" aria-label="Level 45">
+          <div>
+            <strong>45</strong>
+            <span>Level</span>
+          </div>
+        </div>
+
+        <div class="category-head">
+          <p>All <span>Category</span></p>
+          <div><span>Done</span><strong>21</strong></div>
+        </div>
+
+        <ul id="category-list" class="category-list"></ul>
+      </aside>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
