@@ -6,8 +6,9 @@ const SELECTORS = Object.freeze({
   profilePanel: "#profile-panel",
   profileOpen: ".profile-open-trigger",
   profileToggle: ".profile-toggle",
+  profileStickerToggle: ".profile-sticker-toggle",
   profileDetail: "#profile-detail",
-  profileClose: ".profile-close",
+  profileUserCopy: ".profile-user-section p",
 });
 
 const HOVER_COLOR_TOKENS = Object.freeze([
@@ -22,8 +23,8 @@ const HOVER_COLOR_TOKENS = Object.freeze([
 ]);
 
 const HOVER_TARGETS = Object.freeze([
-  "a",
-  "button:not(.avatar)",
+  "a:not(.profile-contact-card)",
+  "button:not(.avatar):not(.profile-sticker-toggle)",
   ".token",
   ".mini-token",
   ".course-card",
@@ -33,6 +34,10 @@ const HOVER_TARGETS = Object.freeze([
 const ACTIVATION_KEYS = new Set(["Enter", " "]);
 const PROFILE_OPEN_FOCUS_DELAY = 940;
 const PROFILE_CLOSE_DURATION = 1180;
+const PROFILE_COLOR_SWEEP_DELAY = 1320;
+const PROFILE_COLOR_SWEEP_STEP = 14;
+const SCRAMBLE_DURATION = 300;
+const SCRAMBLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&+*/<>?";
 
 const DATA = Object.freeze({
   newTags: [
@@ -326,31 +331,180 @@ const applyRandomHover = (scope = document) => {
   });
 };
 
+const scrambleAnimations = new WeakMap();
+
+const easeOutCubic = (value) => 1 - (1 - value) ** 3;
+
+const getRandomScrambleCharacter = () => (
+  SCRAMBLE_CHARACTERS[Math.floor(Math.random() * SCRAMBLE_CHARACTERS.length)]
+);
+
+const getRandomPaletteColor = (colors) => (
+  colors.length ? colors[Math.floor(Math.random() * colors.length)] : "#85847f"
+);
+
+const createScrambledText = (target, revealedCount = 0) => (
+  Array.from(target, (character, index) => (
+    index < revealedCount ? character : getRandomScrambleCharacter()
+  )).join("")
+);
+
+const shouldRevealScrambleWord = (element) => (
+  element.matches(":hover") || document.activeElement === element
+);
+
+const animateScrambleWord = (element, shouldReveal) => {
+  const target = element.dataset.text || element.textContent.trim();
+  const animationId = (scrambleAnimations.get(element) || 0) + 1;
+  const startedAt = performance.now();
+
+  if (!shouldReveal) {
+    const colors = readHoverColors();
+    element.style.setProperty("--scramble-idle-color", getRandomPaletteColor(colors));
+  }
+
+  scrambleAnimations.set(element, animationId);
+  element.classList.toggle("is-revealed", shouldReveal);
+
+  const tick = (now) => {
+    if (scrambleAnimations.get(element) !== animationId) {
+      return;
+    }
+
+    const progress = Math.min((now - startedAt) / SCRAMBLE_DURATION, 1);
+    const eased = easeOutCubic(progress);
+    const revealedCount = shouldReveal
+      ? Math.floor(eased * target.length)
+      : Math.floor((1 - eased) * target.length);
+
+    element.textContent = createScrambledText(target, revealedCount);
+
+    if (progress < 1) {
+      window.requestAnimationFrame(tick);
+      return;
+    }
+
+    element.textContent = shouldReveal ? target : createScrambledText(target);
+  };
+
+  window.requestAnimationFrame(tick);
+};
+
+const setupScrambleWords = (scope = document) => {
+  const colors = readHoverColors();
+
+  scope.querySelectorAll(".profile-scramble-word").forEach((element) => {
+    const target = element.dataset.text || element.textContent.trim();
+
+    element.dataset.text = target;
+    element.style.setProperty("--scramble-idle-color", getRandomPaletteColor(colors));
+    element.textContent = createScrambledText(target);
+
+    element.addEventListener("mouseenter", () => animateScrambleWord(element, true));
+    element.addEventListener("focus", () => animateScrambleWord(element, true));
+    element.addEventListener("mouseleave", () => {
+      if (!shouldRevealScrambleWord(element)) {
+        animateScrambleWord(element, false);
+      }
+    });
+    element.addEventListener("blur", () => {
+      window.setTimeout(() => {
+        if (!shouldRevealScrambleWord(element)) {
+          animateScrambleWord(element, false);
+        }
+      }, 0);
+    });
+  });
+};
+
+const profileColorSweepTimers = new WeakMap();
+
+const clearProfileColorSweep = (element) => {
+  (profileColorSweepTimers.get(element) || []).forEach((timer) => {
+    window.clearTimeout(timer);
+  });
+  profileColorSweepTimers.set(element, []);
+};
+
+const resetProfileColorSweep = (element) => {
+  clearProfileColorSweep(element);
+  element.querySelectorAll(".profile-color-letter").forEach((letter) => {
+    letter.classList.remove("is-colored");
+    letter.style.removeProperty("--profile-letter-color");
+  });
+};
+
+const setupProfileColorSweep = (element) => {
+  const text = element.textContent.replace(/\s+/g, " ").trim();
+  const fragment = document.createDocumentFragment();
+
+  Array.from(text).forEach((character) => {
+    if (/[A-Za-z]/.test(character)) {
+      fragment.appendChild(createElement("span", {
+        className: "profile-color-letter",
+        textContent: character,
+      }));
+      return;
+    }
+
+    fragment.appendChild(document.createTextNode(character));
+  });
+
+  element.replaceChildren(fragment);
+};
+
+const animateProfileColorSweep = (element) => {
+  const colors = readHoverColors();
+  const letters = Array.from(element.querySelectorAll(".profile-color-letter"));
+  const timers = [];
+
+  resetProfileColorSweep(element);
+
+  letters.forEach((letter, index) => {
+    const timer = window.setTimeout(() => {
+      letter.style.setProperty("--profile-letter-color", getRandomPaletteColor(colors));
+      letter.classList.add("is-colored");
+    }, index * PROFILE_COLOR_SWEEP_STEP);
+
+    timers.push(timer);
+  });
+
+  profileColorSweepTimers.set(element, timers);
+};
+
 let profileCloseFocusTimer = 0;
 let profileReturnTimer = 0;
+let profileColorSweepStartTimer = 0;
 
 const setProfileDetailState = (elements, isOpen) => {
   elements.profilePanel.classList.toggle("is-profile-open", isOpen);
   document.body.classList.toggle("profile-detail-open", isOpen);
   elements.profileOpen.setAttribute("aria-expanded", String(isOpen));
   elements.profileToggle.setAttribute("aria-expanded", String(isOpen));
+  elements.profileStickerToggle.setAttribute("aria-expanded", String(isOpen));
   elements.profileDetail.setAttribute("aria-hidden", String(!isOpen));
 };
 
 const openProfileDetail = (elements) => {
   window.clearTimeout(profileCloseFocusTimer);
   window.clearTimeout(profileReturnTimer);
+  window.clearTimeout(profileColorSweepStartTimer);
   elements.profilePanel.classList.remove("is-profile-closing");
   document.body.classList.remove("profile-detail-closing");
   setProfileDetailState(elements, true);
   profileCloseFocusTimer = window.setTimeout(() => {
-    elements.profileClose.focus({ preventScroll: true });
+    elements.profileToggle.focus({ preventScroll: true });
   }, PROFILE_OPEN_FOCUS_DELAY);
+  profileColorSweepStartTimer = window.setTimeout(() => {
+    animateProfileColorSweep(elements.profileUserCopy);
+  }, PROFILE_COLOR_SWEEP_DELAY);
 };
 
 const closeProfileDetail = (elements) => {
   window.clearTimeout(profileCloseFocusTimer);
   window.clearTimeout(profileReturnTimer);
+  window.clearTimeout(profileColorSweepStartTimer);
+  resetProfileColorSweep(elements.profileUserCopy);
 
   if (!isProfileDetailOpen(elements)) {
     return;
@@ -360,6 +514,7 @@ const closeProfileDetail = (elements) => {
   document.body.classList.add("profile-detail-closing");
   elements.profileOpen.setAttribute("aria-expanded", "false");
   elements.profileToggle.setAttribute("aria-expanded", "false");
+  elements.profileStickerToggle.setAttribute("aria-expanded", "false");
   elements.profileDetail.setAttribute("aria-hidden", "true");
 
   profileReturnTimer = window.setTimeout(() => {
@@ -375,16 +530,18 @@ const isProfileDetailOpen = ({ profilePanel }) => (
 );
 
 const setupProfileDetail = (elements) => {
-  elements.profileOpen.addEventListener("click", () => openProfileDetail(elements));
-  elements.profileToggle.addEventListener("click", () => {
+  const toggleProfileDetail = () => {
     if (isProfileDetailOpen(elements)) {
       closeProfileDetail(elements);
       return;
     }
 
     openProfileDetail(elements);
-  });
-  elements.profileClose.addEventListener("click", () => closeProfileDetail(elements));
+  };
+
+  elements.profileOpen.addEventListener("click", toggleProfileDetail);
+  elements.profileToggle.addEventListener("click", toggleProfileDetail);
+  elements.profileStickerToggle.addEventListener("click", toggleProfileDetail);
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && isProfileDetailOpen(elements)) {
@@ -401,8 +558,9 @@ const getAppElements = (scope = document) => ({
   profilePanel: queryRequired(SELECTORS.profilePanel, scope),
   profileOpen: queryRequired(SELECTORS.profileOpen, scope),
   profileToggle: queryRequired(SELECTORS.profileToggle, scope),
+  profileStickerToggle: queryRequired(SELECTORS.profileStickerToggle, scope),
   profileDetail: queryRequired(SELECTORS.profileDetail, scope),
-  profileClose: queryRequired(SELECTORS.profileClose, scope),
+  profileUserCopy: queryRequired(SELECTORS.profileUserCopy, scope),
 });
 
 const renderApp = ({ elements, data }) => {
@@ -419,7 +577,9 @@ const App = {
     const elements = getAppElements(scope);
 
     renderApp({ elements, data: DATA });
+    setupProfileColorSweep(elements.profileUserCopy);
     setupProfileDetail(elements);
+    setupScrambleWords(scope);
     applyRandomHover(scope);
   },
 };
