@@ -151,7 +151,7 @@ button.random-hover:focus-visible {
   opacity: 0.72;
 }
 
-.topbar > * {
+.topbar>* {
   position: relative;
   z-index: 1;
 }
@@ -693,7 +693,7 @@ body.profile-detail-closing .lesson-area {
   overflow: hidden;
   background: #f0f0ee;
   border-right: 1px solid #d1d1ce;
-  animation: profile-card-slide-left 760ms cubic-bezier(0.22, 0.72, 0.18, 1) both;
+  animation: profile-card-slide-left 720ms cubic-bezier(0.18, 0.82, 0.42, 1) both;
 }
 
 .profile-panel.is-profile-open .profile-detail {
@@ -706,7 +706,7 @@ body.profile-detail-closing .lesson-area {
   background: #fbfbf9;
   border-left: 1px solid rgba(0, 0, 0, 0.08);
   transform-origin: left center;
-  animation: profile-detail-reveal 680ms 700ms cubic-bezier(0.18, 0.82, 0.2, 1) both;
+  animation: profile-detail-reveal 420ms 340ms cubic-bezier(0.16, 0.9, 0.2, 1) both;
 }
 
 .profile-panel.is-profile-open .profile-detail::-webkit-scrollbar {
@@ -765,7 +765,6 @@ body.profile-detail-closing .lesson-area {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   margin-top: clamp(56px, 6vw, 88px);
-  background: rgba(255, 255, 255, 0.72);
 }
 
 .profile-metrics article {
@@ -825,9 +824,7 @@ body.profile-detail-closing .lesson-area {
 
 .profile-color-letter {
   color: inherit;
-  transition:
-    color 220ms ease,
-    text-shadow 220ms ease;
+  transition: text-shadow 800ms ease-in-out;
 }
 
 .profile-color-letter.is-colored {
@@ -963,19 +960,12 @@ body.profile-detail-closing .lesson-area {
 }
 
 @keyframes profile-detail-reveal {
-  0% {
+  from {
     opacity: 0;
     transform: translateX(28px) scale(0.96);
-    animation-timing-function: cubic-bezier(0.18, 0.82, 0.2, 1);
   }
 
-  76% {
-    opacity: 1;
-    transform: translateX(0) scale(1.012);
-    animation-timing-function: cubic-bezier(0.22, 0.68, 0.24, 1);
-  }
-
-  100% {
+  to {
     opacity: 1;
     transform: translateX(0) scale(1);
   }
@@ -1306,7 +1296,7 @@ body.profile-detail-closing .lesson-area {
   .profile-panel.is-profile-open .profile-card {
     border-right: 0;
     border-bottom: 1px solid #d1d1ce;
-    animation: profile-card-mobile-slide 600ms cubic-bezier(0.22, 0.72, 0.18, 1) both;
+    animation: profile-card-mobile-slide 560ms cubic-bezier(0.18, 0.82, 0.42, 1) both;
   }
 
   .profile-panel.is-profile-closing .profile-card {
@@ -1317,7 +1307,7 @@ body.profile-detail-closing .lesson-area {
     padding: 26px 18px 42px;
     overflow: visible;
     transform-origin: top center;
-    animation: profile-detail-mobile-reveal 560ms 560ms cubic-bezier(0.18, 0.82, 0.2, 1) both;
+    animation: profile-detail-mobile-reveal 380ms 300ms cubic-bezier(0.16, 0.9, 0.2, 1) both;
   }
 
   .profile-panel.is-profile-closing .profile-detail {
@@ -1385,17 +1375,12 @@ body.profile-detail-closing .lesson-area {
 }
 
 @keyframes profile-detail-mobile-reveal {
-  0% {
+  from {
     opacity: 0;
     transform: translateY(18px) scale(0.96);
   }
 
-  76% {
-    opacity: 1;
-    transform: translateY(0) scale(1.012);
-  }
-
-  100% {
+  to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
