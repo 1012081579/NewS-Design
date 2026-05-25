@@ -68,7 +68,7 @@
               aria-controls="profile-detail"
               aria-expanded="false"
             >
-              <img src="src/arrow.svg" alt="" aria-hidden="true" />
+              <span class="profile-toggle-icon" aria-hidden="true"></span>
             </button>
           </div>
 
@@ -82,9 +82,15 @@
             <img src="src/profile.png" alt="Profile avatar" />
           </button>
 
-          <div class="level-ring">
+          <button
+            class="level-ring profile-sticker-toggle"
+            type="button"
+            aria-label="Toggle profile introduction"
+            aria-controls="profile-detail"
+            aria-expanded="false"
+          >
             <img src="src/sticker1.png" alt="Profile sticker" />
-          </div>
+          </button>
 
           <div class="category-head">
             <p>All <span>Category</span></p>
@@ -95,37 +101,60 @@
         </div>
 
         <section id="profile-detail" class="profile-detail" aria-label="About me" aria-hidden="true">
-          <div class="profile-detail-top">
-            <p class="micro-heading">About <span>Me</span></p>
-            <button class="profile-close" type="button" aria-label="Close profile introduction">Back</button>
+          <div class="profile-intro">
+            <h2>Hi, I’m a designer — just not the pixel-pushing kind.</h2>
+            <p>
+              I design with
+              <span class="profile-scramble-word" data-text="code" tabindex="0">code</span>,
+              <span class="profile-scramble-word" data-text="data" tabindex="0">data</span>, and
+              <span class="profile-scramble-word" data-text="impact" tabindex="0">impact</span> in mind.
+            </p>
           </div>
 
-          <div class="profile-detail-hero">
-            <p class="profile-kicker">Engineering and Design</p>
-            <h2>I shape systems that make ideas feel clear, useful, and alive.</h2>
-          </div>
-
-          <div class="profile-detail-grid">
+          <div class="profile-metrics" aria-label="Profile highlights">
             <article>
-              <span>01</span>
-              <h3>Design Systems</h3>
-              <p>Building reusable visual languages with rhythm, hierarchy, and interaction rules.</p>
+              <strong>Code</strong>
+              <p>Building with an engineering mindset.</p>
             </article>
             <article>
-              <span>02</span>
-              <h3>Product Thinking</h3>
-              <p>Turning fuzzy problems into structured flows, prototypes, and meaningful outcomes.</p>
+              <strong>Data</strong>
+              <p>Designing based on behavior, not assumptions.</p>
             </article>
             <article>
-              <span>03</span>
-              <h3>Motion Details</h3>
-              <p>Using small, physical transitions to make interfaces feel responsive instead of mechanical.</p>
+              <strong>Impact</strong>
+              <p>Creating EXPs that move products forward.</p>
             </article>
           </div>
 
-          <p class="profile-detail-note">
-            I like interfaces with a little personality: clean enough to understand quickly, expressive enough to remember.
-          </p>
+          <div class="profile-user-section">
+            <h3>For<br />Users</h3>
+            <p>
+              Good products aren’t driven by aesthetics alone. They’re shaped by usability,
+              clarity, and the small details that make experiences feel effortless.
+            </p>
+          </div>
+
+          <section class="profile-contact" aria-label="Where can find me">
+            <h3>
+              Where can find me
+              <img src="src/arrow_right.svg" alt="" aria-hidden="true" />
+            </h3>
+
+            <div class="profile-contact-grid">
+              <a class="profile-contact-card" href="#" aria-label="Gmail">
+                <img src="src/gmail.png" alt="" aria-hidden="true" />
+                <span>Gmail</span>
+              </a>
+              <a class="profile-contact-card" href="#" aria-label="LinkedIn">
+                <img src="src/linkedin.png" alt="" aria-hidden="true" />
+                <span>LinkedIn</span>
+              </a>
+              <a class="profile-contact-card" href="#" aria-label="Instagram">
+                <img src="src/ins.png" alt="" aria-hidden="true" />
+                <span>Instagram</span>
+              </a>
+            </div>
+          </section>
         </section>
       </aside>
     </main>
