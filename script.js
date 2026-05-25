@@ -35,8 +35,9 @@ const ACTIVATION_KEYS = new Set(["Enter", " "]);
 const PROFILE_OPEN_FOCUS_DELAY = 940;
 const PROFILE_CLOSE_DURATION = 1180;
 const PROFILE_COLOR_SWEEP_DELAY = 1320;
-const PROFILE_COLOR_SWEEP_STEP = 14;
+const PROFILE_COLOR_SWEEP_STEP = 130;
 const SCRAMBLE_DURATION = 300;
+const SCRAMBLE_UPDATE_INTERVAL = 48;
 const SCRAMBLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&+*/<>?";
 
 const DATA = Object.freeze({
@@ -357,6 +358,7 @@ const animateScrambleWord = (element, shouldReveal) => {
   const target = element.dataset.text || element.textContent.trim();
   const animationId = (scrambleAnimations.get(element) || 0) + 1;
   const startedAt = performance.now();
+  let lastRenderedStep = -1;
 
   if (!shouldReveal) {
     const colors = readHoverColors();
@@ -376,8 +378,12 @@ const animateScrambleWord = (element, shouldReveal) => {
     const revealedCount = shouldReveal
       ? Math.floor(eased * target.length)
       : Math.floor((1 - eased) * target.length);
+    const renderStep = Math.floor((now - startedAt) / SCRAMBLE_UPDATE_INTERVAL);
 
-    element.textContent = createScrambledText(target, revealedCount);
+    if (renderStep !== lastRenderedStep || progress >= 1) {
+      element.textContent = createScrambledText(target, revealedCount);
+      lastRenderedStep = renderStep;
+    }
 
     if (progress < 1) {
       window.requestAnimationFrame(tick);
@@ -422,6 +428,7 @@ const profileColorSweepTimers = new WeakMap();
 const clearProfileColorSweep = (element) => {
   (profileColorSweepTimers.get(element) || []).forEach((timer) => {
     window.clearTimeout(timer);
+    window.clearInterval(timer);
   });
   profileColorSweepTimers.set(element, []);
 };
@@ -457,18 +464,41 @@ const animateProfileColorSweep = (element) => {
   const colors = readHoverColors();
   const letters = Array.from(element.querySelectorAll(".profile-color-letter"));
   const timers = [];
+  let letterIndex = 0;
+  let activeLetter = null;
 
   resetProfileColorSweep(element);
 
-  letters.forEach((letter, index) => {
-    const timer = window.setTimeout(() => {
-      letter.style.setProperty("--profile-letter-color", getRandomPaletteColor(colors));
-      letter.classList.add("is-colored");
-    }, index * PROFILE_COLOR_SWEEP_STEP);
+  if (!letters.length) {
+    return;
+  }
 
-    timers.push(timer);
-  });
+  const clearActiveLetter = () => {
+    if (!activeLetter) {
+      return;
+    }
 
+    activeLetter.classList.remove("is-colored");
+    activeLetter.style.removeProperty("--profile-letter-color");
+    activeLetter = null;
+  };
+
+  const lightNextLetter = () => {
+    clearActiveLetter();
+
+    if (letterIndex >= letters.length) {
+      letterIndex = 0;
+      return;
+    }
+
+    activeLetter = letters[letterIndex];
+    activeLetter.style.setProperty("--profile-letter-color", getRandomPaletteColor(colors));
+    activeLetter.classList.add("is-colored");
+    letterIndex += 1;
+  };
+
+  lightNextLetter();
+  timers.push(window.setInterval(lightNextLetter, PROFILE_COLOR_SWEEP_STEP));
   profileColorSweepTimers.set(element, timers);
 };
 
