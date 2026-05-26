@@ -1,10 +1,12 @@
 const SELECTORS = Object.freeze({
+  brand: ".brand",
   newTags: "#new-tags",
   completedTags: "#done-tags",
   courseGrid: "#course-grid",
   categoryList: "#category-list",
   profilePanel: "#profile-panel",
   profileOpen: ".profile-open-trigger",
+  profileLaunch: ".profile-launch-trigger",
   profileToggle: ".profile-toggle",
   profileStickerToggle: ".profile-sticker-toggle",
   profileDetail: "#profile-detail",
@@ -510,6 +512,7 @@ const setProfileDetailState = (elements, isOpen) => {
   elements.profilePanel.classList.toggle("is-profile-open", isOpen);
   document.body.classList.toggle("profile-detail-open", isOpen);
   elements.profileOpen.setAttribute("aria-expanded", String(isOpen));
+  elements.profileLaunch.setAttribute("aria-expanded", String(isOpen));
   elements.profileToggle.setAttribute("aria-expanded", String(isOpen));
   elements.profileStickerToggle.setAttribute("aria-expanded", String(isOpen));
   elements.profileDetail.setAttribute("aria-hidden", String(!isOpen));
@@ -530,7 +533,7 @@ const openProfileDetail = (elements) => {
   }, PROFILE_COLOR_SWEEP_DELAY);
 };
 
-const closeProfileDetail = (elements) => {
+const closeProfileDetail = (elements, returnFocusTarget = elements.profileOpen) => {
   window.clearTimeout(profileCloseFocusTimer);
   window.clearTimeout(profileReturnTimer);
   window.clearTimeout(profileColorSweepStartTimer);
@@ -543,6 +546,7 @@ const closeProfileDetail = (elements) => {
   elements.profilePanel.classList.add("is-profile-closing");
   document.body.classList.add("profile-detail-closing");
   elements.profileOpen.setAttribute("aria-expanded", "false");
+  elements.profileLaunch.setAttribute("aria-expanded", "false");
   elements.profileToggle.setAttribute("aria-expanded", "false");
   elements.profileStickerToggle.setAttribute("aria-expanded", "false");
   elements.profileDetail.setAttribute("aria-hidden", "true");
@@ -551,12 +555,16 @@ const closeProfileDetail = (elements) => {
     elements.profilePanel.classList.remove("is-profile-closing");
     document.body.classList.remove("profile-detail-closing");
     setProfileDetailState(elements, false);
-    elements.profileOpen.focus({ preventScroll: true });
+    returnFocusTarget.focus({ preventScroll: true });
   }, PROFILE_CLOSE_DURATION);
 };
 
 const isProfileDetailOpen = ({ profilePanel }) => (
   profilePanel.classList.contains("is-profile-open")
+);
+
+const isProfileDetailClosing = ({ profilePanel }) => (
+  profilePanel.classList.contains("is-profile-closing")
 );
 
 const setupProfileDetail = (elements) => {
@@ -570,8 +578,20 @@ const setupProfileDetail = (elements) => {
   };
 
   elements.profileOpen.addEventListener("click", toggleProfileDetail);
+  elements.profileLaunch.addEventListener("click", () => {
+    if (!isProfileDetailOpen(elements) && !isProfileDetailClosing(elements)) {
+      openProfileDetail(elements);
+    }
+  });
   elements.profileToggle.addEventListener("click", toggleProfileDetail);
   elements.profileStickerToggle.addEventListener("click", toggleProfileDetail);
+  elements.brand.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    if (isProfileDetailOpen(elements) && !isProfileDetailClosing(elements)) {
+      closeProfileDetail(elements, elements.brand);
+    }
+  });
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && isProfileDetailOpen(elements)) {
@@ -581,12 +601,14 @@ const setupProfileDetail = (elements) => {
 };
 
 const getAppElements = (scope = document) => ({
+  brand: queryRequired(SELECTORS.brand, scope),
   newTags: queryRequired(SELECTORS.newTags, scope),
   completedTags: queryRequired(SELECTORS.completedTags, scope),
   courseGrid: queryRequired(SELECTORS.courseGrid, scope),
   categoryList: queryRequired(SELECTORS.categoryList, scope),
   profilePanel: queryRequired(SELECTORS.profilePanel, scope),
   profileOpen: queryRequired(SELECTORS.profileOpen, scope),
+  profileLaunch: queryRequired(SELECTORS.profileLaunch, scope),
   profileToggle: queryRequired(SELECTORS.profileToggle, scope),
   profileStickerToggle: queryRequired(SELECTORS.profileStickerToggle, scope),
   profileDetail: queryRequired(SELECTORS.profileDetail, scope),
