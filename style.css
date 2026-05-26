@@ -25,6 +25,16 @@ html {
   box-sizing: border-box;
 }
 
+::selection {
+  background: #000;
+  color: #fff;
+}
+
+::-moz-selection {
+  background: #000;
+  color: #fff;
+}
+
 body {
   margin: 0;
   min-height: 100%;
@@ -157,8 +167,7 @@ button.random-hover:focus-visible {
 }
 
 .brand-row,
-.utility-row,
-.nav-links {
+.utility-row {
   display: flex;
   align-items: center;
 }
@@ -172,7 +181,19 @@ button.random-hover:focus-visible {
   text-decoration: none;
   font-size: 17px;
   font-weight: 400;
+  gap: 0;
   letter-spacing: 0;
+}
+
+.brand.random-hover:hover,
+.brand.random-hover:focus-visible {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.brand.random-hover:hover span,
+.brand.random-hover:focus-visible span {
+  color: var(--hover-fill);
 }
 
 .brand span:last-child,
@@ -195,17 +216,8 @@ button.random-hover:focus-visible {
   color: #171715;
 }
 
-.nav-links {
-  align-self: end;
-  gap: 27px;
-  padding-bottom: 11px;
-}
-
-.nav-links a {
-  text-decoration: none;
-}
-
 .utility-row {
+  grid-column: 3;
   justify-self: end;
   gap: 88px;
 }
@@ -221,6 +233,10 @@ button.random-hover:focus-visible {
   padding: 0;
   font-weight: 400;
   cursor: pointer;
+}
+
+.menu-btn.brand {
+  gap: 0;
 }
 
 .search-icon {
@@ -280,7 +296,7 @@ button.random-hover:focus-visible {
 
 .lesson-area {
   display: grid;
-  grid-template-rows: 252px auto;
+  grid-template-rows: auto auto;
   align-content: start;
   min-width: 0;
   min-height: 0;
@@ -333,6 +349,7 @@ h1 {
 
 .tag-row-done {
   padding-left: 0px;
+  padding-bottom: 32px;
 }
 
 .micro-heading {
@@ -769,7 +786,7 @@ body.profile-detail-closing .lesson-area {
 
 .profile-metrics article {
   min-height: 250px;
-  padding: 8px clamp(32px, 4.1vw, 76px) 28px;
+  padding: 100px clamp(32px, 4.1vw, 76px) 80px;
   border-left: 1px solid #d8d8d5;
 }
 
@@ -1224,16 +1241,8 @@ body.profile-detail-closing .lesson-area {
     padding: 10px 12px;
   }
 
-  .nav-links {
-    grid-column: 1 / -1;
-    justify-self: stretch;
-    justify-content: space-between;
-    order: 3;
-    gap: 12px;
-    padding-bottom: 0;
-  }
-
   .utility-row {
+    grid-column: auto;
     gap: 22px;
   }
 
@@ -1257,7 +1266,7 @@ body.profile-detail-closing .lesson-area {
   .lesson-top {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto;
-    padding-bottom: 20px;
+    padding-bottom: 0;
   }
 
   .headline-block {
@@ -1408,8 +1417,7 @@ body.profile-detail-closing .lesson-area {
   }
 
   .brand-row,
-  .utility-row,
-  .nav-links {
+  .utility-row {
     justify-content: space-between;
   }
 
@@ -1444,13 +1452,6 @@ body.profile-detail-closing .lesson-area {
   .search-btn,
   .menu-btn {
     top: 40px;
-  }
-
-  .nav-links {
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    overflow: visible;
-    gap: 14px 22px;
   }
 
   .headline-block {
