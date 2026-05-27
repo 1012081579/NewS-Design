@@ -56,19 +56,19 @@ const DATA = Object.freeze({
   completedTags: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
   courses: [
     {
-      count: "12",
-      label: "Done",
-      title: ["Strategy", "Session"],
-      tags: [{ label: "2", type: "text" }, { label: "T", tone: "neutral" }],
-      icon: "bottle",
+      count: "1",
+      label: "Work",
+      title: ["Paylux", "UIUX"],
+      tags: [{ label: "U", type: "yellow" }, { label: "1", tone: "neutral" }],
+      image: "src/paylux.png",
       variant: "strategy",
     },
     {
       count: "3",
       label: "Lessons",
-      title: ["Brain", "Upgrade"],
+      title: ["SJA", "EXP"],
       tags: [{ label: "Q", tone: "neutral" }, { label: "7", tone: "orange" }],
-      icon: "suitcase",
+      image: "src/SJA.png",
       variant: "brain",
     },
     {
@@ -245,10 +245,19 @@ const createCourseCard = (course) => {
     className: `course-card course-card-${course.variant}`,
   });
   const tags = createElement("div", { className: "course-tags" });
-  const icon = createElement("div", {
-    className: `silhouette ${course.icon}`,
-    attributes: { "aria-hidden": "true" },
-  });
+  const icon = course.image
+    ? createElement("img", {
+      className: "silhouette course-image",
+      attributes: {
+        src: course.image,
+        alt: "",
+        "aria-hidden": "true",
+      },
+    })
+    : createElement("div", {
+      className: `silhouette ${course.icon}`,
+      attributes: { "aria-hidden": "true" },
+    });
 
   renderList(tags, course.tags, createCourseTag);
   card.append(createCourseStat(course), createCourseTitle(course.title), tags, icon);
