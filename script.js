@@ -34,6 +34,16 @@ const HOVER_TARGETS = Object.freeze([
 ]);
 
 const ACTIVATION_KEYS = new Set(["Enter", " "]);
+const SELECTION_KEYS = new Set([
+  "ArrowLeft",
+  "ArrowRight",
+  "ArrowUp",
+  "ArrowDown",
+  "Home",
+  "End",
+  "PageUp",
+  "PageDown",
+]);
 const PROFILE_OPEN_FOCUS_DELAY = 940;
 const PROFILE_CLOSE_DURATION = 1180;
 const PROFILE_COLOR_SWEEP_DELAY = 1320;
@@ -47,7 +57,7 @@ const DATA = Object.freeze({
     { label: "U", tone: "yellow" },
     { label: "P", tone: "lavender" },
     { label: "B", tone: "pink" },
-    { label: "M", tone: "green" },
+    { label: "V", tone: "green" },
     { label: "X", tone: "gold" },
     { label: "I", tone: "cyan" },
     { label: "S", tone: "lime" },
@@ -64,91 +74,59 @@ const DATA = Object.freeze({
       variant: "strategy",
     },
     {
-      count: "3",
-      label: "Lessons",
+      count: "2",
+      label: "Work",
       title: ["SJA", "EXP"],
-      tags: [{ label: "Q", tone: "neutral" }, { label: "7", tone: "orange" }],
+      tags: [{ label: "X", tone: "gold" }, { label: "1", tone: "neutral" }],
       image: "src/SJA.png",
       variant: "brain",
     },
     {
-      count: "8",
-      label: "Lessons",
-      title: ["Focus", "Sprint"],
-      tags: [{ label: "A", tone: "neutral" }, { label: "4", tone: "orange" }],
-      icon: "pillar",
+      count: "3",
+      label: "Work",
+      title: ["Religio", "Graphic"],
+      tags: [{ label: "B", tone: "pink" }, { label: "1", tone: "orange" }],
+      image: "src/religio.png",
       variant: "extra",
     },
     {
       count: "5",
-      label: "Lessons",
-      title: ["Market", "Signal"],
-      tags: [{ label: "M", tone: "neutral" }, { label: "9", tone: "orange" }],
-      icon: "suitcase",
+      label: "Work",
+      title: ["VVL", "VI"],
+      tags: [{ label: "V", tone: "green" }, { label: "1", tone: "orange" }],
+      image: "src/VVL.png",
       variant: "brain",
     },
     {
       count: "7",
-      label: "Lessons",
-      title: ["Audio", "Flow"],
-      tags: [{ label: "F", tone: "neutral" }, { label: "2", tone: "orange" }],
-      icon: "pillar",
+      label: "Work",
+      title: ["One Stone", "Brand"],
+      tags: [{ label: "V", tone: "green" }, { label: "2", tone: "orange" }],
+      image: "src/onestone.png",
       variant: "extra",
     },
     {
       count: "4",
-      label: "Lessons",
-      title: ["Brand", "System"],
-      tags: [{ label: "B", tone: "neutral" }, { label: "6", tone: "orange" }],
-      icon: "bottle",
+      label: "Work",
+      title: ["CF", "UIUX"],
+      tags: [{ label: "U", tone: "yellow" }, { label: "2", tone: "orange" }],
+      image: "src/commerceFlow.png",
       variant: "brain",
     },
     {
       count: "9",
-      label: "Lessons",
-      title: ["Creative", "Drill"],
-      tags: [{ label: "C", tone: "neutral" }, { label: "3", tone: "orange" }],
-      icon: "suitcase",
+      label: "Work",
+      title: ["Line Gift", "UIUX"],
+      tags: [{ label: "U", tone: "yellow" }, { label: "3", tone: "orange" }],
+      image: "src/lineGift.png",
       variant: "extra",
     },
     {
       count: "2",
-      label: "Lessons",
-      title: ["Research", "Lab"],
-      tags: [{ label: "R", tone: "neutral" }, { label: "8", tone: "orange" }],
-      icon: "pillar",
-      variant: "brain",
-    },
-    {
-      count: "6",
-      label: "Lessons",
-      title: ["Growth", "Map"],
-      tags: [{ label: "G", tone: "neutral" }, { label: "1", tone: "orange" }],
-      icon: "bottle",
-      variant: "extra",
-    },
-    {
-      count: "10",
-      label: "Lessons",
-      title: ["Design", "Edge"],
-      tags: [{ label: "D", tone: "neutral" }, { label: "5", tone: "orange" }],
-      icon: "suitcase",
-      variant: "brain",
-    },
-    {
-      count: "1",
-      label: "Lesson",
-      title: ["Launch", "Mode"],
-      tags: [{ label: "L", tone: "neutral" }, { label: "0", tone: "orange" }],
-      icon: "pillar",
-      variant: "extra",
-    },
-    {
-      count: "11",
-      label: "Lessons",
-      title: ["Final", "Review"],
-      tags: [{ label: "V", tone: "neutral" }, { label: "2", tone: "orange" }],
-      icon: "bottle",
+      label: "Work",
+      title: ["Pipeliner", "UIUX"],
+      tags: [{ label: "P", tone: "yellow" }, { label: "1", tone: "orange" }],
+      image: "src/pipeLiner.png",
       variant: "brain",
     },
   ],
@@ -162,6 +140,59 @@ const DATA = Object.freeze({
     { mark: "E", name: "Edge", detail: "Innovation happens at the edge \u2014 between technology, culture, and human behavior." },
   ],
 });
+
+const ARCHIVE_NO_TONE = "light";
+const PROJECT_CATEGORY_TONES = DATA.newTags.map(({ tone }) => tone).filter(Boolean);
+const PROJECT_CATEGORY_TONE_BY_LABEL = new Map(
+  DATA.newTags.map(({ label, tone }) => [label, tone])
+);
+
+const getStableToneIndex = (label) => (
+  Array.from(label).reduce((total, character) => total + character.charCodeAt(0), 0)
+  % PROJECT_CATEGORY_TONES.length
+);
+
+const getProjectCategoryTone = (label) => (
+  PROJECT_CATEGORY_TONE_BY_LABEL.get(label)
+  || PROJECT_CATEGORY_TONES[getStableToneIndex(label)]
+  || "neutral"
+);
+
+const getCourseTagTone = ({ label, tone }, index) => {
+  if (index === 0) {
+    return getProjectCategoryTone(label);
+  }
+
+  if (index === 1) {
+    return ARCHIVE_NO_TONE;
+  }
+
+  return tone || "neutral";
+};
+
+const FILTER_TYPES = Object.freeze({
+  projectCategory: "project-category",
+  archiveNo: "archive-no",
+});
+
+const getCourseProjectCategory = ({ tags = [] }) => tags[0]?.label || "";
+const getCourseArchiveNo = ({ tags = [] }) => tags[1]?.label || "";
+
+const courseMatchesFilter = (course, filter) => {
+  if (!filter) {
+    return true;
+  }
+
+  if (filter.type === FILTER_TYPES.projectCategory) {
+    return getCourseProjectCategory(course) === filter.value;
+  }
+
+  if (filter.type === FILTER_TYPES.archiveNo) {
+    return getCourseArchiveNo(course) === filter.value;
+  }
+
+  return true;
+};
 
 const queryRequired = (selector, scope = document) => {
   const element = scope.querySelector(selector);
@@ -201,17 +232,22 @@ const createElement = (tagName, options = {}) => {
 const renderList = (host, items, createItem) => {
   const fragment = document.createDocumentFragment();
 
-  items.forEach((item) => {
-    fragment.appendChild(createItem(item));
+  items.forEach((item, index) => {
+    fragment.appendChild(createItem(item, index));
   });
 
   host.replaceChildren(fragment);
 };
 
-const createToken = (label, className = "") => (
-  createElement("span", {
+const createToken = (label, className = "", attributes = {}) => (
+  createElement("button", {
     className: `token ${className}`.trim(),
     textContent: label,
+    attributes: {
+      type: "button",
+      "aria-pressed": "false",
+      ...attributes,
+    },
   })
 );
 
@@ -233,16 +269,19 @@ const createCourseTitle = ([primary, secondary]) => {
   return title;
 };
 
-const createCourseTag = ({ label, type, tone }) => (
+const createCourseTag = ({ label, type, tone }, index = 0) => (
   createElement("span", {
-    className: type === "text" ? "small-number" : `mini-token ${tone}`,
+    className: type === "text" ? "small-number" : `mini-token ${getCourseTagTone({ label, tone }, index)}`,
     textContent: label,
   })
 );
 
-const createCourseCard = (course) => {
+const createCourseCard = (course, index = 0) => {
   const card = createElement("article", {
     className: `course-card course-card-${course.variant}`,
+    attributes: {
+      style: `--card-index: ${index};`,
+    },
   });
   const tags = createElement("div", { className: "course-tags" });
   const icon = course.image
@@ -263,6 +302,62 @@ const createCourseCard = (course) => {
   card.append(createCourseStat(course), createCourseTitle(course.title), tags, icon);
 
   return card;
+};
+
+const setFilterTokenState = (elements, activeFilter) => {
+  [elements.newTags, elements.completedTags].forEach((host) => {
+    host.querySelectorAll("[data-filter-type][data-filter-value]").forEach((token) => {
+      const isActive = Boolean(
+        activeFilter
+        && token.dataset.filterType === activeFilter.type
+        && token.dataset.filterValue === activeFilter.value
+      );
+
+      token.classList.toggle("is-active", isActive);
+      token.setAttribute("aria-pressed", String(isActive));
+    });
+  });
+};
+
+const renderFilteredCourses = ({ elements, data, activeFilter }) => {
+  const courses = data.courses.filter((course) => courseMatchesFilter(course, activeFilter));
+
+  elements.courseGrid.classList.add("is-filtering");
+  renderList(elements.courseGrid, courses, createCourseCard);
+  applyRandomHover(elements.courseGrid);
+};
+
+const setupCourseFilters = ({ elements, data }) => {
+  let activeFilter = null;
+
+  const applyFilter = (nextFilter) => {
+    activeFilter = nextFilter;
+    renderFilteredCourses({ elements, data, activeFilter });
+    setFilterTokenState(elements, activeFilter);
+  };
+
+  const handleFilterClick = (event) => {
+    const token = event.target.closest("[data-filter-type][data-filter-value]");
+
+    if (!token || (!elements.newTags.contains(token) && !elements.completedTags.contains(token))) {
+      return;
+    }
+
+    const nextFilter = {
+      type: token.dataset.filterType,
+      value: token.dataset.filterValue,
+    };
+    const isSameFilter = Boolean(
+      activeFilter
+      && activeFilter.type === nextFilter.type
+      && activeFilter.value === nextFilter.value
+    );
+
+    applyFilter(isSameFilter ? null : nextFilter);
+  };
+
+  elements.newTags.addEventListener("click", handleFilterClick);
+  elements.completedTags.addEventListener("click", handleFilterClick);
 };
 
 const closeCategoryItems = (host) => {
@@ -322,6 +417,27 @@ const readHoverColors = () => {
   return HOVER_COLOR_TOKENS
     .map((name) => styles.getPropertyValue(name).trim())
     .filter(Boolean);
+};
+
+const assignRandomSelectionColor = () => {
+  const colors = readHoverColors();
+
+  if (!colors.length) {
+    return;
+  }
+
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  document.documentElement.style.setProperty("--selection-ink", color);
+};
+
+const setupRandomSelectionColor = () => {
+  assignRandomSelectionColor();
+  document.addEventListener("selectstart", assignRandomSelectionColor);
+  document.addEventListener("keydown", (event) => {
+    if (event.shiftKey && SELECTION_KEYS.has(event.key)) {
+      assignRandomSelectionColor();
+    }
+  });
 };
 
 const assignRandomHoverColor = (element, colors) => {
@@ -625,8 +741,20 @@ const getAppElements = (scope = document) => ({
 });
 
 const renderApp = ({ elements, data }) => {
-  renderList(elements.newTags, data.newTags, (tag) => createToken(tag.label, tag.tone));
-  renderList(elements.completedTags, data.completedTags, (label) => createToken(label, "light"));
+  renderList(elements.newTags, data.newTags, (tag) => (
+    createToken(tag.label, tag.tone, {
+      "aria-label": `Project category ${tag.label}`,
+      "data-filter-type": FILTER_TYPES.projectCategory,
+      "data-filter-value": tag.label,
+    })
+  ));
+  renderList(elements.completedTags, data.completedTags, (label) => (
+    createToken(label, "light", {
+      "aria-label": `Archive number ${label}`,
+      "data-filter-type": FILTER_TYPES.archiveNo,
+      "data-filter-value": label,
+    })
+  ));
   renderList(elements.courseGrid, data.courses, createCourseCard);
   renderList(elements.categoryList, data.categories, (category) => (
     createCategoryItem(category, elements.categoryList)
@@ -638,9 +766,11 @@ const App = {
     const elements = getAppElements(scope);
 
     renderApp({ elements, data: DATA });
+    setupCourseFilters({ elements, data: DATA });
     setupProfileColorSweep(elements.profileUserCopy);
     setupProfileDetail(elements);
     setupScrambleWords(scope);
+    setupRandomSelectionColor();
     applyRandomHover(scope);
   },
 };
